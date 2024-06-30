@@ -32,12 +32,38 @@ let rec visit | doc "Recursive graph exploration, for topological sorting"
       mark-node new-state name
   in
 let topo-sort | doc "Topologically sort nodes in a graph from dependencies"
-  = fun graph node =>
+  = fun nodes graph =>
     graph
     |> init-state
-    |> (fun s => visit s node)
+    |> (fun s => std.array.fold_left visit s nodes)
     |> std.record.get "visited"
   in
 {
-  order = topo-sort graph "qux"
+  order = topo-sort ["qux"] graph,
+  # REF: https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/GraphTopsort.html
+  tasks =
+    topo-sort
+      ["J6", "J7"]
+      {
+        "J7" = ["J5"],
+        "J6" = ["J2"],
+        "J5" = ["J4", "J2"],
+        "J4" = ["J2", "J3"],
+        "J3" = ["J1"],
+        "J2" = ["J1"],
+        "J1" = []
+      },
+  classes =
+    topo-sort
+      ["3214", "3604", "3304"]
+      {
+        "3214" = ["2506"],
+        "2506" = ["3114", "2505"],
+        "3604" = ["3114"],
+        "3304" = ["3114"],
+        "3114" = ["2505"],
+        "2505" = ["2114"],
+        "2114" = ["1114"],
+        "1114" = [],
+      }
 }
